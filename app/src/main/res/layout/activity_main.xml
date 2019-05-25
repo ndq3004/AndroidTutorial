@@ -16,10 +16,11 @@
                   android:id="@android:id/tabcontent"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent">
+
                      <ListView
                          android:id="@+id/restaurants"
                          android:layout_width="match_parent"
-                         android:layout_height="match_parent"/>
+                         android:layout_height="match_parent" />
 
                      <TableLayout
                          android:id="@+id/details"
@@ -64,10 +65,17 @@
                                        android:maxLines="2"
                                        android:maxWidth="200sp"/>
                             </TableRow>
-                            <Button android:id="@+id/save"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="Save"/>
+
+                           <TableRow>
+                                  <TextView android:text=""/>
+                                  <Button android:id="@+id/save"
+                                      android:layout_width="100dp"
+                                      android:layout_height="wrap_content"
+                                      android:text="Save"
+                                      android:layout_marginRight="230dp"
+                                      />
+
+                           </TableRow>
                      </TableLayout>
               </FrameLayout>
        </LinearLayout>

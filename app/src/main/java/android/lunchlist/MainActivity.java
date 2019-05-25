@@ -1,12 +1,11 @@
 package android.lunchlist;
 
-import android.app.TabActivity;
+import android.SQLiteUtility.RestaurantHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends TabActivity {
+public class MainActivity extends AppCompatActivity {
     List<Restaurant> model = new ArrayList<>();
     RestaurantAdapter adapter = null;
     EditText name=null;
@@ -33,6 +32,9 @@ public class MainActivity extends TabActivity {
     RadioGroup types=null;
     TabHost tabHost=null;
     Restaurant current=null;
+    RestaurantHelper helper;
+    ListView list;
+    Button save;
 //    TextView selection;
 //    Spinner spn;
     @Override
@@ -40,40 +42,18 @@ public class MainActivity extends TabActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        name = findViewById(R.id.name);
-        address = findViewById(R.id.addr);
-        types = findViewById(R.id.types);
-        notes = findViewById(R.id.notes);
-
-        Button save = findViewById(R.id.save);
-        save.setOnClickListener(onSave);
-
-        ListView list = findViewById(R.id.restaurants);
-//
-//        adapter = new ArrayAdapter<>(this,
-//                                                android.R.layout.simple_list_item_1,
-//                                                model);
-        adapter = new RestaurantAdapter();
-        list.setAdapter(adapter);
-        tabHost = findViewById(android.R.id.tabhost);
-        tabHost.setup();
-
-        //restaurants
-        TabHost.TabSpec spec = tabHost.newTabSpec("tag1");
-        spec.setContent(R.id.restaurants);
-        spec.setIndicator("List", getResources().getDrawable(R.drawable.list));
-        tabHost.addTab(spec);
-
-        //details
-        spec = tabHost.newTabSpec("tag2");
-        spec.setContent(R.id.details);
-        spec.setIndicator("Details", getResources().getDrawable(R.drawable.restaurant));
-        tabHost.addTab(spec);
-        tabHost.setCurrentTab(0);
-
-        list.setOnItemClickListener(onListClick);
+        //define helper and init tabHost
+        defineHelperAndInitTabhost();
 
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+        helper.close();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.option, menu);
@@ -84,7 +64,8 @@ public class MainActivity extends TabActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId()==R.id.toast){
+        if(item.getItemId()==R.id.work_space){
+            setContentView(R.layout.activity_main);
             String message = "No restaurant selected";
 
             if(current!=null)  {
@@ -92,8 +73,13 @@ public class MainActivity extends TabActivity {
             }
 
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-
+            defineHelperAndInitTabhost();
             return(true);
+        }
+        else if(item.getItemId() == R.id.add_account){
+            setContentView(R.layout.activity_main);
+            defineHelperAndInitTabhost();
+            tabHost.setCurrentTab(1);
         }
         return(super.onOptionsItemSelected(item));
     }
@@ -122,7 +108,7 @@ public class MainActivity extends TabActivity {
                     current.setType("delivery");
                     break;
             }
-
+            helper.insert(current);
             adapter.add(current);
         }
     };
@@ -200,7 +186,39 @@ public class MainActivity extends TabActivity {
         }
     }
 
+    public void defineHelperAndInitTabhost(){
+        helper = new RestaurantHelper(this);
+        name = findViewById(R.id.name);
+        address = findViewById(R.id.addr);
+        types = findViewById(R.id.types);
+        notes = findViewById(R.id.notes);
 
+        save = findViewById(R.id.save);
+        save.setOnClickListener(onSave);
+
+        list = findViewById(R.id.restaurants);
+
+        model = helper.getAll();
+        adapter = new RestaurantAdapter();
+        list.setAdapter(adapter);
+        tabHost = findViewById(android.R.id.tabhost);
+        tabHost.setup();
+
+        //restaurants
+        TabHost.TabSpec spec = tabHost.newTabSpec("tag1");
+        spec.setContent(R.id.restaurants);
+        spec.setIndicator("List", getResources().getDrawable(R.drawable.list));
+        tabHost.addTab(spec);
+
+        //details
+        spec = tabHost.newTabSpec("tag2");
+        spec.setContent(R.id.details);
+        spec.setIndicator("Details", getResources().getDrawable(R.drawable.restaurant));
+        tabHost.addTab(spec);
+        tabHost.setCurrentTab(0);
+
+        list.setOnItemClickListener(onListClick);
+    }
 
 
 }
